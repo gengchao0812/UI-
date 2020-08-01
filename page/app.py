@@ -1,4 +1,4 @@
-
+import yaml
 from appium import  webdriver
 from page.base_page import BasePage
 from page.main import Main
@@ -17,6 +17,8 @@ class App(BasePage):
             desired_caps['appPackage'] = self._package
             desired_caps['appActivity'] = self._activity
             desired_caps['noReset'] = 'true'
+            #变量的公用化
+            desired_caps['udid'] = yaml.safe_load(open("../page/configuration.yaml"))['caps']['udid']
             self._driver = webdriver.Remote("http://127.0.0.1:4723/wd/hub",desired_caps)
             print("开始等待")
 

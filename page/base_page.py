@@ -10,7 +10,7 @@ class BasePage:
     def find(self,locator,value):
         return self._driver.find_element(locator,value)
 
-    #步骤
+    #测试步骤的驱动
     def steps(self,path):
         with open(path) as f:
             steps = yaml.safe_load(f)
