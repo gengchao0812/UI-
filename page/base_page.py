@@ -23,7 +23,7 @@ class BasePage:
                     break
             return self.find(locator,value)
 
-    #测试步骤的驱动
+    #测试步骤的驱动1
     def steps(self,path):
         with open(path) as f:
             steps = yaml.safe_load(f)
