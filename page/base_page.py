@@ -2,8 +2,10 @@ import yaml
 from _pytest import logging
 from appium.webdriver.common.mobileby import MobileBy
 from appium.webdriver.webdriver import WebDriver
+from rest_framework.utils import json
 from webdriver.common.by import By
 from webdriver.remote.mobile import Mobile
+from webdriver.support.wait import WebDriverWait
 
 from page.handblack import handle_black
 
@@ -12,6 +14,7 @@ class BasePage:
     _driver: WebDriver = None
     _black_list=[(By.id,"iv_close")]
     logging.basicConfig(level=logging.INFO)
+    _params = {}
     def __init__(self,driver:WebDriver = None):
         self._driver = driver
 
@@ -60,10 +63,10 @@ class BasePage:
                                         '.scrollIntoView(new UiSelector()'
                                         f'.text("{text}").instance(0));')
 
-    def find_by_text_awT(text):
+    def find_by_text_awT(self,text):
         return self.find(MobileBy.XPATH, f'//*[@class="android.widget.TextView" and @text="{text}"]')
 
-    def find_by_text(text):
+    def find_by_text(self,text):
         return self.find(MobileBy.XPATH, f'// *[contains(@ text, "{text}")]')
 
     def webdriver_wait(self, locator,timeout=10):
@@ -80,14 +83,27 @@ class BasePage:
 
 
     #测试步骤的驱动1
-    def steps(self,path):
-        with open(path) as f:
-            steps = yaml.safe_load(f)
+    def steps(self,path,name):
+        with open(path, encoding="utf-8") as f:
+            steps = yaml.safe_load(f)[name]
+        #path改成json
+        raw = json.dumps(steps)
+        #反复遍历
+        for key, value in self._params.items():
+            #替换Key是字典的Key 替换成字典的value
+            raw = raw.replace('${' + key + '}', value)
+        #json改成python
+        steps = json.loads(raw)
         for step in steps:
             if "by" in step.keys():
                 element = self.find(step["by"],step["locator"])
             if "action" in step.keys():
                 action = step["action"]
-                if action == "click":
+                if "click" == action:
                     element.click()
+                if "send" == action:
+                    element.send_keys(step["value"])
+                if "len > 0 " == action:
+                    eles = self.finds(step["by"],step["locator"])
+                    return len(eles) > 0
 
